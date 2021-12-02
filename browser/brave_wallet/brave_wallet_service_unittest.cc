@@ -416,7 +416,8 @@ class BraveWalletServiceUnitTest : public testing::Test {
     ASSERT_NE(valid_addresses, nullptr);
 
     base::RunLoop run_loop;
-    keyring_controller_->GetDefaultKeyringInfo(
+    keyring_controller_->GetKeyringInfo(
+        mojom::kDefaultKeyringId,
         base::BindLambdaForTesting([&](mojom::KeyringInfoPtr keyring_info) {
           *valid_addresses = false;
           if (keyring_info->account_infos.size() == addresses.size()) {

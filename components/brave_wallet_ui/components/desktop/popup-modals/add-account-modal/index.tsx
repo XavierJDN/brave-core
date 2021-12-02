@@ -112,7 +112,10 @@ const AddAccountModal = (props: Props) => {
     }
     if (tab === 'import') {
       if (importOption === 'key') {
-        onImportAccount(accountName, privateKey)
+        // onImportFilecoinKey(accountName, privateKey, FILECOIN_TESTNET, FilecoinAddressProtocol.BLS)
+        if (!accountName) {
+          onImportAccount(accountName, privateKey)
+        }
       } else {
         if (file) {
           const index = file[0]

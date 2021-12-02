@@ -7,7 +7,6 @@ import { BraveWallet } from '../../../constants/types'
 import LedgerBridgeKeyring from './eth_ledger_bridge_keyring'
 import { SignatureVRS } from '../../hardware_operations'
 import { LedgerDerivationPaths } from '../types'
-import { HardwareCoins } from '../../api/hardware_keyrings'
 
 class MockApp {
   signature: SignatureVRS
@@ -41,7 +40,7 @@ test('Extracting accounts from device', () => {
           'hardwareVendor': 'Ledger',
           'name': 'Ledger',
           'deviceId': 'device1',
-          'coin': HardwareCoins.ETH
+          'coin': BraveWallet.BraveCoins.ETH
         },
         {
           'address': 'address for m/44\'/60\'/1\'/0/0',
@@ -49,7 +48,7 @@ test('Extracting accounts from device', () => {
           'hardwareVendor': 'Ledger',
           'name': 'Ledger',
           'deviceId': 'device1',
-          'coin': HardwareCoins.ETH
+          'coin': BraveWallet.BraveCoins.ETH
         }],
       success: true
     }
@@ -66,7 +65,7 @@ test('Extracting accounts from legacy device', () => {
           'hardwareVendor': 'Ledger',
           'name': 'Ledger',
           'deviceId': 'device1',
-          'coin': HardwareCoins.ETH
+          'coin': BraveWallet.BraveCoins.ETH
         },
         {
           'address': 'address for m/44\'/60\'/1\'/0',
@@ -74,7 +73,7 @@ test('Extracting accounts from legacy device', () => {
           'hardwareVendor': 'Ledger',
           'name': 'Ledger',
           'deviceId': 'device1',
-          'coin': HardwareCoins.ETH
+          'coin': BraveWallet.BraveCoins.ETH
         }],
       success: true
     }

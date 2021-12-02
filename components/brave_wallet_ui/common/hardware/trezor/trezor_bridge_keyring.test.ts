@@ -26,7 +26,6 @@ import { getMockedTransactionInfo } from '../../constants/mocks'
 import { HardwareOperationResult, SignHardwareTransactionOperationResult } from '../../hardware_operations'
 import { Unsuccessful } from 'trezor-connect'
 import { TrezorDerivationPaths } from '../types'
-import { HardwareCoins } from '../../api/hardware_keyrings'
 
 let uuid = 0
 window.crypto = {
@@ -319,7 +318,7 @@ test('Extract accounts from unlocked device returned success', () => {
             'deviceId': '5454545',
             'hardwareVendor': 'Trezor',
             'name': 'Trezor',
-            'coin': HardwareCoins.ETH
+            'coin': BraveWallet.BraveCoins.ETH
           },
           {
             'address': '0x8e926dF9926746ba352F4d479Fb5DE47382e83bE',
@@ -327,7 +326,7 @@ test('Extract accounts from unlocked device returned success', () => {
             'deviceId': '5454545',
             'hardwareVendor': 'Trezor',
             'name': 'Trezor',
-            'coin': HardwareCoins.ETH
+            'coin': BraveWallet.BraveCoins.ETH
           }],
           success: true
     })
@@ -359,7 +358,7 @@ test('Extracting accounts from unlocked device returned success without zero ind
         'deviceId': '5454545',
         'hardwareVendor': 'Trezor',
         'name': 'Trezor',
-        'coin': HardwareCoins.ETH
+        'coin': BraveWallet.BraveCoins.ETH
       }],
       success: true
     })

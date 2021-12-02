@@ -3,13 +3,13 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 import * as bls from '@noble/bls12-381'
-import { LEDGER_HARDWARE_VENDOR } from 'gen/brave/components/brave_wallet/common/brave_wallet.mojom.m.js'
 import {
   LedgerProvider, TransportWrapper
 } from '@glif/filecoin-wallet-provider'
+import { BraveWallet } from '../../../constants/types'
 import { CoinType } from '@glif/filecoin-address'
 import { LedgerFilecoinKeyring } from '../interfaces'
-import { HardwareVendor, HardwareCoins, getCoinName } from '../../api/hardware_keyrings'
+import { HardwareVendor, getCoinName } from '../../api/hardware_keyrings'
 import {
   GetAccountsHardwareOperationResult,
   HardwareOperationResult,
@@ -42,12 +42,12 @@ export default class FilecoinLedgerKeyring implements LedgerFilecoinKeyring {
   private deviceId: string
   private provider?: LedgerProvider
 
-  coin = (): HardwareCoins => {
-    return HardwareCoins.FILECOIN
+  coin = (): BraveWallet.BraveCoins => {
+    return BraveWallet.BraveCoins.FILECOIN
   }
 
   type = (): HardwareVendor => {
-    return LEDGER_HARDWARE_VENDOR
+    return BraveWallet.LEDGER_HARDWARE_VENDOR
   }
 
   getAccounts = async (from: number, to: number, coinType?: CoinType): Promise<GetAccountsHardwareOperationResult> => {

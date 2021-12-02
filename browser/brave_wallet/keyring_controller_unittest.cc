@@ -179,7 +179,6 @@ class KeyringControllerUnitTest : public testing::Test {
     run_loop.Run();
     return success;
   }
-
   static absl::optional<std::string> ImportFilecoinSECP256K1Account(
       KeyringController* controller,
       const std::string& account_name,
@@ -756,7 +755,8 @@ TEST_F(KeyringControllerUnitTest, GetMnemonicForDefaultKeyring) {
 TEST_F(KeyringControllerUnitTest, GetDefaultKeyringInfo) {
   KeyringController controller(GetPrefs());
   bool callback_called = false;
-  controller.GetDefaultKeyringInfo(
+  controller.GetKeyringInfo(
+      mojom::kDefaultKeyringId,
       base::BindLambdaForTesting([&](mojom::KeyringInfoPtr keyring_info) {
         EXPECT_FALSE(keyring_info->is_default_keyring_created);
         EXPECT_TRUE(keyring_info->is_locked);
@@ -771,7 +771,8 @@ TEST_F(KeyringControllerUnitTest, GetDefaultKeyringInfo) {
   base::RunLoop().RunUntilIdle();
 
   callback_called = false;
-  controller.GetDefaultKeyringInfo(
+  controller.GetKeyringInfo(
+      mojom::kDefaultKeyringId,
       base::BindLambdaForTesting([&](mojom::KeyringInfoPtr keyring_info) {
         EXPECT_TRUE(keyring_info->is_default_keyring_created);
         EXPECT_FALSE(keyring_info->is_locked);
@@ -790,7 +791,8 @@ TEST_F(KeyringControllerUnitTest, GetDefaultKeyringInfo) {
   base::RunLoop().RunUntilIdle();
 
   callback_called = false;
-  controller.GetDefaultKeyringInfo(
+  controller.GetKeyringInfo(
+      mojom::kDefaultKeyringId,
       base::BindLambdaForTesting([&](mojom::KeyringInfoPtr keyring_info) {
         EXPECT_TRUE(keyring_info->is_default_keyring_created);
         EXPECT_FALSE(keyring_info->is_locked);
@@ -1179,7 +1181,8 @@ TEST_F(KeyringControllerUnitTest, ImportedAccounts) {
   EXPECT_FALSE(observer.AccountsChangedFired());
 
   callback_called = false;
-  controller.GetDefaultKeyringInfo(
+  controller.GetKeyringInfo(
+      brave_wallet::kDefaultKeyringId,
       base::BindLambdaForTesting([&](mojom::KeyringInfoPtr keyring_info) {
         EXPECT_TRUE(keyring_info->is_default_keyring_created);
         EXPECT_FALSE(keyring_info->is_locked);
@@ -1222,7 +1225,8 @@ TEST_F(KeyringControllerUnitTest, ImportedAccounts) {
 
   callback_called = false;
   // Imported accounts should be restored
-  controller.GetDefaultKeyringInfo(
+  controller.GetKeyringInfo(
+      brave_wallet::kDefaultKeyringId,
       base::BindLambdaForTesting([&](mojom::KeyringInfoPtr keyring_info) {
         EXPECT_EQ(keyring_info->account_infos.size(), 3u);
         EXPECT_EQ(keyring_info->account_infos[1]->address,
@@ -1443,9 +1447,9 @@ TEST_F(KeyringControllerUnitTest, SetDefaultKeyringDerivedAccountMeta) {
   bool callback_called = false;
   base::RunLoop().RunUntilIdle();
   EXPECT_FALSE(observer.AccountsChangedFired());
-  controller.SetDefaultKeyringDerivedAccountName(
-      "0xf81229FE54D8a20fBc1e1e2a3451D1c7489437Db", kUpdatedName,
-      base::BindLambdaForTesting([&](bool success) {
+  controller.SetKeyringDerivedAccountName(
+      mojom::kDefaultKeyringId, "0xf81229FE54D8a20fBc1e1e2a3451D1c7489437Db",
+      kUpdatedName, base::BindLambdaForTesting([&](bool success) {
         EXPECT_FALSE(success);
         callback_called = true;
       }));
@@ -1485,8 +1489,9 @@ TEST_F(KeyringControllerUnitTest, SetDefaultKeyringDerivedAccountMeta) {
   callback_called = false;
   base::RunLoop().RunUntilIdle();
   EXPECT_FALSE(observer.AccountsChangedFired());
-  controller.SetDefaultKeyringDerivedAccountName(
-      "", kUpdatedName, base::BindLambdaForTesting([&](bool success) {
+  controller.SetKeyringDerivedAccountName(
+      mojom::kDefaultKeyringId, "", kUpdatedName,
+      base::BindLambdaForTesting([&](bool success) {
         EXPECT_FALSE(success);
         callback_called = true;
       }));
@@ -1497,8 +1502,9 @@ TEST_F(KeyringControllerUnitTest, SetDefaultKeyringDerivedAccountMeta) {
 
   callback_called = false;
   EXPECT_FALSE(observer.AccountsChangedFired());
-  controller.SetDefaultKeyringDerivedAccountName(
-      address2, "", base::BindLambdaForTesting([&](bool success) {
+  controller.SetKeyringDerivedAccountName(
+      mojom::kDefaultKeyringId, address2, "",
+      base::BindLambdaForTesting([&](bool success) {
         EXPECT_FALSE(success);
         callback_called = true;
       }));
@@ -1509,8 +1515,9 @@ TEST_F(KeyringControllerUnitTest, SetDefaultKeyringDerivedAccountMeta) {
 
   callback_called = false;
   EXPECT_FALSE(observer.AccountsChangedFired());
-  controller.SetDefaultKeyringDerivedAccountName(
-      address2, kUpdatedName, base::BindLambdaForTesting([&](bool success) {
+  controller.SetKeyringDerivedAccountName(
+      mojom::kDefaultKeyringId, address2, kUpdatedName,
+      base::BindLambdaForTesting([&](bool success) {
         EXPECT_TRUE(success);
         callback_called = true;
       }));
@@ -1555,8 +1562,8 @@ TEST_F(KeyringControllerUnitTest, SetDefaultKeyringImportedAccountName) {
 
   // Fail when no imported accounts.
   bool callback_called = false;
-  controller.SetDefaultKeyringImportedAccountName(
-      imported_accounts[1].address, kUpdatedName,
+  controller.SetKeyringImportedAccountName(
+      mojom::kDefaultKeyringId, imported_accounts[1].address, kUpdatedName,
       base::BindLambdaForTesting([&](bool success) {
         EXPECT_FALSE(success);
         callback_called = true;
@@ -1585,8 +1592,9 @@ TEST_F(KeyringControllerUnitTest, SetDefaultKeyringImportedAccountName) {
 
   // Empty address should fail.
   callback_called = false;
-  controller.SetDefaultKeyringImportedAccountName(
-      "", kUpdatedName, base::BindLambdaForTesting([&](bool success) {
+  controller.SetKeyringImportedAccountName(
+      mojom::kDefaultKeyringId, "", kUpdatedName,
+      base::BindLambdaForTesting([&](bool success) {
         EXPECT_FALSE(success);
         callback_called = true;
       }));
@@ -1595,8 +1603,8 @@ TEST_F(KeyringControllerUnitTest, SetDefaultKeyringImportedAccountName) {
 
   // Empty name should fail.
   callback_called = false;
-  controller.SetDefaultKeyringImportedAccountName(
-      imported_accounts[1].address, "",
+  controller.SetKeyringImportedAccountName(
+      mojom::kDefaultKeyringId, imported_accounts[1].address, "",
       base::BindLambdaForTesting([&](bool success) {
         EXPECT_FALSE(success);
         callback_called = true;
@@ -1606,8 +1614,8 @@ TEST_F(KeyringControllerUnitTest, SetDefaultKeyringImportedAccountName) {
 
   // Update second imported account's name.
   callback_called = false;
-  controller.SetDefaultKeyringImportedAccountName(
-      imported_accounts[1].address, kUpdatedName,
+  controller.SetKeyringImportedAccountName(
+      mojom::kDefaultKeyringId, imported_accounts[1].address, kUpdatedName,
       base::BindLambdaForTesting([&](bool success) {
         EXPECT_TRUE(success);
         callback_called = true;
@@ -1633,7 +1641,8 @@ TEST_F(KeyringControllerUnitTest, SetDefaultKeyringImportedAccountName) {
 
   // Only second imported account's name is updated.
   callback_called = false;
-  controller.GetDefaultKeyringInfo(
+  controller.GetKeyringInfo(
+      brave_wallet::kDefaultKeyringId,
       base::BindLambdaForTesting([&](mojom::KeyringInfoPtr keyring_info) {
         EXPECT_TRUE(keyring_info->is_default_keyring_created);
         EXPECT_FALSE(keyring_info->is_locked);
@@ -1721,11 +1730,14 @@ TEST_F(KeyringControllerUnitTest, HardwareAccounts) {
 
   std::vector<mojom::HardwareWalletAccountPtr> new_accounts;
   new_accounts.push_back(mojom::HardwareWalletAccount::New(
-      "0x111", "m/44'/60'/1'/0/0", "name 1", "Ledger", "device1", "coin"));
+      "0x111", "m/44'/60'/1'/0/0", "name 1", "Ledger", "device1",
+      mojom::BraveCoins::ETH));
   new_accounts.push_back(mojom::HardwareWalletAccount::New(
-      "0x264", "m/44'/60'/2'/0/0", "name 2", "Ledger", "device1", "coin"));
+      "0x264", "m/44'/60'/2'/0/0", "name 2", "Ledger", "device1",
+      mojom::BraveCoins::ETH));
   new_accounts.push_back(mojom::HardwareWalletAccount::New(
-      "0xEA0", "m/44'/60'/3'/0/0", "name 3", "Ledger", "device2", "coin"));
+      "0xEA0", "m/44'/60'/3'/0/0", "name 3", "Ledger", "device2",
+      mojom::BraveCoins::ETH));
 
   EXPECT_FALSE(observer.AccountsChangedFired());
   controller.AddHardwareAccounts(std::move(new_accounts));
@@ -1737,7 +1749,8 @@ TEST_F(KeyringControllerUnitTest, HardwareAccounts) {
                   ->FindPath("hardware.device1.account_metas.0x111"));
 
   bool callback_called = false;
-  controller.GetDefaultKeyringInfo(
+  controller.GetKeyringInfo(
+      brave_wallet::kDefaultKeyringId,
       base::BindLambdaForTesting([&](mojom::KeyringInfoPtr keyring_info) {
         const auto& accounts = keyring_info->account_infos;
         EXPECT_EQ(accounts.size(), 4u);
@@ -1790,7 +1803,8 @@ TEST_F(KeyringControllerUnitTest, HardwareAccounts) {
   observer.Reset();
 
   callback_called = false;
-  controller.GetDefaultKeyringInfo(
+  controller.GetKeyringInfo(
+      brave_wallet::kDefaultKeyringId,
       base::BindLambdaForTesting([&](mojom::KeyringInfoPtr keyring_info) {
         const auto& accounts = keyring_info->account_infos;
         EXPECT_EQ(accounts.size(), size_t(2));
@@ -1966,9 +1980,9 @@ TEST_F(KeyringControllerUnitTest, SetSelectedAccount) {
   // Can set hardware account
   std::vector<mojom::HardwareWalletAccountPtr> new_accounts;
   std::string hardware_account = "0x1111111111111111111111111111111111111111";
-  new_accounts.push_back(
-      mojom::HardwareWalletAccount::New(hardware_account, "m/44'/60'/1'/0/0",
-                                        "name 1", "Ledger", "device1", "coin"));
+  new_accounts.push_back(mojom::HardwareWalletAccount::New(
+      hardware_account, "m/44'/60'/1'/0/0", "name 1", "Ledger", "device1",
+      mojom::BraveCoins::ETH));
   AddHardwareAccount(&controller, std::move(new_accounts));
   EXPECT_TRUE(SetSelectedAccount(&controller, &observer, hardware_account));
   EXPECT_EQ(hardware_account, GetSelectedAccount(&controller));
@@ -1994,7 +2008,8 @@ TEST_F(KeyringControllerUnitTest, AddAccountsWithDefaultName) {
   controller.AddAccountsWithDefaultName(3);
 
   base::RunLoop run_loop;
-  controller.GetDefaultKeyringInfo(
+  controller.GetKeyringInfo(
+      brave_wallet::kDefaultKeyringId,
       base::BindLambdaForTesting([&](mojom::KeyringInfoPtr keyring_info) {
         EXPECT_TRUE(keyring_info->is_default_keyring_created);
         EXPECT_EQ(keyring_info->account_infos.size(), 5u);
@@ -2019,7 +2034,8 @@ TEST_F(KeyringControllerUnitTest, SignMessageByDefaultKeyring) {
   std::string account1;
   {
     base::RunLoop run_loop;
-    controller.GetDefaultKeyringInfo(
+    controller.GetKeyringInfo(
+        brave_wallet::kDefaultKeyringId,
         base::BindLambdaForTesting([&](mojom::KeyringInfoPtr keyring_info) {
           ASSERT_EQ(keyring_info->account_infos.size(), 1u);
           account1 = keyring_info->account_infos[0]->address;
@@ -2104,11 +2120,13 @@ TEST_F(KeyringControllerUnitTest, SetDefaultKeyringHardwareAccountName) {
     const char* name;
     const char* vendor;
     const char* device_id;
-    const char* coin;
-  } hardware_accounts[] = {
-      {"0x111", "m/44'/60'/1'/0/0", "name 1", "Ledger", "device1", "coin"},
-      {"0x264", "m/44'/60'/2'/0/0", "name 2", "Ledger", "device1", "coin"},
-      {"0xEA0", "m/44'/60'/3'/0/0", "name 3", "Ledger", "device2", "coin"}};
+    mojom::BraveCoins coin;
+  } hardware_accounts[] = {{"0x111", "m/44'/60'/1'/0/0", "name 1", "Ledger",
+                            "device1", mojom::BraveCoins::ETH},
+                           {"0x264", "m/44'/60'/2'/0/0", "name 2", "Ledger",
+                            "device1", mojom::BraveCoins::ETH},
+                           {"0xEA0", "m/44'/60'/3'/0/0", "name 3", "Ledger",
+                            "device2", mojom::BraveCoins::ETH}};
 
   std::vector<mojom::HardwareWalletAccountPtr> new_accounts;
   for (const auto& it : hardware_accounts) {
@@ -2168,7 +2186,8 @@ TEST_F(KeyringControllerUnitTest, SetDefaultKeyringHardwareAccountName) {
 
   // Only second hardware account's name is updated.
   callback_called = false;
-  controller.GetDefaultKeyringInfo(
+  controller.GetKeyringInfo(
+      brave_wallet::kDefaultKeyringId,
       base::BindLambdaForTesting([&](mojom::KeyringInfoPtr keyring_info) {
         EXPECT_TRUE(keyring_info->is_default_keyring_created);
         EXPECT_FALSE(keyring_info->is_locked);
@@ -2320,7 +2339,8 @@ TEST_F(KeyringControllerUnitTest, UnknownKeyring) {
   controller.Unlock("brave", base::DoNothing());
   base::RunLoop().RunUntilIdle();
   callback_called = false;
-  controller.GetDefaultKeyringInfo(
+  controller.GetKeyringInfo(
+      brave_wallet::kDefaultKeyringId,
       base::BindLambdaForTesting([&](mojom::KeyringInfoPtr keyring_info) {
         EXPECT_TRUE(keyring_info->is_default_keyring_created);
         EXPECT_FALSE(keyring_info->is_locked);

@@ -11,16 +11,11 @@ import * as HWInterfaces from '../hardware/interfaces'
 import FilecoinLedgerKeyring from '../hardware/ledgerjs/filecoin_ledger_keyring'
 export type HardwareKeyring = LedgerBridgeKeyring | TrezorBridgeKeyring
 
-export enum HardwareCoins {
-  FILECOIN = 'fil',
-  ETH = 'eth'
-}
-
-export function getCoinName (coin: HardwareCoins) {
+export function getCoinName (coin: BraveWallet.BraveCoins) {
   switch (coin) {
-    case HardwareCoins.FILECOIN:
+    case BraveWallet.BraveCoins.FILECOIN:
       return 'Filecoin'
-    case HardwareCoins.ETH:
+    case BraveWallet.BraveCoins.ETH:
       return 'Ethereum'
   }
   return ''
@@ -43,7 +38,7 @@ export function getBraveKeyring (): BraveWallet.KeyringControllerRemote {
   return keyringController
 }
 
-export function getHardwareKeyring (type: HardwareVendor, coin: HardwareCoins = HardwareCoins.ETH): HWInterfaces.LedgerEthereumKeyring | HWInterfaces.TrezorKeyring | HWInterfaces.LedgerFilecoinKeyring {
+export function getHardwareKeyring (type: HardwareVendor, coin: BraveWallet.BraveCoins = BraveWallet.BraveCoins.ETH): HWInterfaces.LedgerEthereumKeyring | HWInterfaces.TrezorKeyring | HWInterfaces.LedgerFilecoinKeyring {
   if (type === BraveWallet.LEDGER_HARDWARE_VENDOR) {
     const ledgerKeyring = getLedgerHardwareKeyring(coin)
     assert(type === ledgerKeyring.type())
@@ -55,14 +50,14 @@ export function getHardwareKeyring (type: HardwareVendor, coin: HardwareCoins = 
   return trezorKeyring
 }
 
-export function getLedgerHardwareKeyring (coin: HardwareCoins): HWInterfaces.LedgerEthereumKeyring | HWInterfaces.LedgerFilecoinKeyring {
-  if (coin === HardwareCoins.ETH) {
+export function getLedgerHardwareKeyring (coin: BraveWallet.BraveCoins): HWInterfaces.LedgerEthereumKeyring | HWInterfaces.LedgerFilecoinKeyring {
+  if (coin === BraveWallet.BraveCoins.ETH) {
     if (!ethereumHardwareKeyring) {
       ethereumHardwareKeyring = new LedgerBridgeKeyring()
     }
     return ethereumHardwareKeyring
   }
-  assert(coin === HardwareCoins.FILECOIN)
+  assert(coin === BraveWallet.BraveCoins.FILECOIN)
   if (!filecoinHardwareKeyring) {
     filecoinHardwareKeyring = new FilecoinLedgerKeyring()
   }

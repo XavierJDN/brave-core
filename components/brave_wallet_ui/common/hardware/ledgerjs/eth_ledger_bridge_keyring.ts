@@ -17,7 +17,7 @@ import {
   SignHardwareTransactionOperationResult
 } from '../../hardware_operations'
 import { LedgerEthereumKeyring } from '../interfaces'
-import { HardwareVendor, HardwareCoins } from '../../api/hardware_keyrings'
+import { HardwareVendor } from '../../api/hardware_keyrings'
 import { HardwareOperationResult, LedgerDerivationPaths } from '../types'
 
 export enum LedgerErrorsCodes {
@@ -27,8 +27,8 @@ export default class LedgerBridgeKeyring implements LedgerEthereumKeyring {
   private app?: Eth
   private deviceId: string
 
-  coin = (): HardwareCoins => {
-    return HardwareCoins.ETH
+  coin = (): BraveWallet.BraveCoins => {
+    return BraveWallet.BraveCoins.ETH
   }
 
   type = (): HardwareVendor => {
@@ -105,7 +105,7 @@ export default class LedgerBridgeKeyring implements LedgerEthereumKeyring {
       if (!unlocked.success || !this.app) {
         return unlocked
       }
-      const eth: Eth = this.app
+        const eth: Eth = this.app
       const messageHex = Buffer.from(message).toString('hex')
       const data = await eth.signPersonalMessage(path, messageHex)
       const signature = this.createMessageSignature(data)
