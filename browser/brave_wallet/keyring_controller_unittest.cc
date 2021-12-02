@@ -1721,11 +1721,11 @@ TEST_F(KeyringControllerUnitTest, HardwareAccounts) {
 
   std::vector<mojom::HardwareWalletAccountPtr> new_accounts;
   new_accounts.push_back(mojom::HardwareWalletAccount::New(
-      "0x111", "m/44'/60'/1'/0/0", "name 1", "Ledger", "device1"));
+      "0x111", "m/44'/60'/1'/0/0", "name 1", "Ledger", "device1", "coin"));
   new_accounts.push_back(mojom::HardwareWalletAccount::New(
-      "0x264", "m/44'/60'/2'/0/0", "name 2", "Ledger", "device1"));
+      "0x264", "m/44'/60'/2'/0/0", "name 2", "Ledger", "device1", "coin"));
   new_accounts.push_back(mojom::HardwareWalletAccount::New(
-      "0xEA0", "m/44'/60'/3'/0/0", "name 3", "Ledger", "device2"));
+      "0xEA0", "m/44'/60'/3'/0/0", "name 3", "Ledger", "device2", "coin"));
 
   EXPECT_FALSE(observer.AccountsChangedFired());
   controller.AddHardwareAccounts(std::move(new_accounts));
@@ -1966,8 +1966,9 @@ TEST_F(KeyringControllerUnitTest, SetSelectedAccount) {
   // Can set hardware account
   std::vector<mojom::HardwareWalletAccountPtr> new_accounts;
   std::string hardware_account = "0x1111111111111111111111111111111111111111";
-  new_accounts.push_back(mojom::HardwareWalletAccount::New(
-      hardware_account, "m/44'/60'/1'/0/0", "name 1", "Ledger", "device1"));
+  new_accounts.push_back(
+      mojom::HardwareWalletAccount::New(hardware_account, "m/44'/60'/1'/0/0",
+                                        "name 1", "Ledger", "device1", "coin"));
   AddHardwareAccount(&controller, std::move(new_accounts));
   EXPECT_TRUE(SetSelectedAccount(&controller, &observer, hardware_account));
   EXPECT_EQ(hardware_account, GetSelectedAccount(&controller));
@@ -2103,15 +2104,17 @@ TEST_F(KeyringControllerUnitTest, SetDefaultKeyringHardwareAccountName) {
     const char* name;
     const char* vendor;
     const char* device_id;
+    const char* coin;
   } hardware_accounts[] = {
-      {"0x111", "m/44'/60'/1'/0/0", "name 1", "Ledger", "device1"},
-      {"0x264", "m/44'/60'/2'/0/0", "name 2", "Ledger", "device1"},
-      {"0xEA0", "m/44'/60'/3'/0/0", "name 3", "Ledger", "device2"}};
+      {"0x111", "m/44'/60'/1'/0/0", "name 1", "Ledger", "device1", "coin"},
+      {"0x264", "m/44'/60'/2'/0/0", "name 2", "Ledger", "device1", "coin"},
+      {"0xEA0", "m/44'/60'/3'/0/0", "name 3", "Ledger", "device2", "coin"}};
 
   std::vector<mojom::HardwareWalletAccountPtr> new_accounts;
   for (const auto& it : hardware_accounts) {
     new_accounts.push_back(mojom::HardwareWalletAccount::New(
-        it.address, it.derivation_path, it.name, it.vendor, it.device_id));
+        it.address, it.derivation_path, it.name, it.vendor, it.device_id,
+        it.coin));
   }
 
   const std::string kUpdatedName = "Updated ledger accoount 2";
