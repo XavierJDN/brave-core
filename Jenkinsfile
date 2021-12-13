@@ -102,7 +102,7 @@ pipeline {
                                                 credentials('brave-builds-github-token-for-pr-builder')
                                                 github('brave/devops', 'https')
                                             }
-                                            //FIXME: revert before merging!
+                                            //FIXME: revert before merging
                                             //branch('${params.DEVOPS_BRANCH}')
                                             branch('wknapik-sync-instead-of-init')
                                         }
