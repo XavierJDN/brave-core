@@ -1,6 +1,11 @@
+# Copyright (c) 2021 The Brave Authors. All rights reserved.
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this file,
+# You can obtain one at http://mozilla.org/MPL/2.0/.
+
 # Add imports here for things that need to be available in chromium code.
-# This file is included in most gn files either directly or through
-# import("//build/config/chrome_build.gni") in compiler.gni
+# This file is included everywhere through BUILDCONFIG.gn.
+
 import("//brave/app/entitlements.gni")
 import("//brave/brave_repack_locales.gni")
 import("//brave/browser/extensions/resources.gni")
