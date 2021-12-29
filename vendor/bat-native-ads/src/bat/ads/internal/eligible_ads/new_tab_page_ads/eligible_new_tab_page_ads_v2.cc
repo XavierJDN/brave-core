@@ -65,14 +65,13 @@ void EligibleAdsV2::GetEligibleAds(
   database_table.GetAll([=](const bool success, const SegmentList& segments,
                             const CreativeNewTabPageAdList& creative_ads) {
     if (!success) {
-      BLOG(1, "Failed to get ads");
+      BLOG(1, "Failed to get creative new tab page ads");
       callback(/* had_opportunity */ false, {});
       return;
     }
 
     const CreativeNewTabPageAdList& eligible_creative_ads =
         FilterCreativeAds(creative_ads, ad_events, browsing_history);
-
     if (eligible_creative_ads.empty()) {
       BLOG(1, "No eligible ads");
       callback(/* had_opportunity */ true, {});
