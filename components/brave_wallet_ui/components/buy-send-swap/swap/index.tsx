@@ -133,6 +133,9 @@ function Swap (props: Props) {
     })
   }
 
+  console.log(fromAsset, fromAssetBalance, fromAmount)
+  console.log(toAsset, toAssetBalance, toAmount)
+
   return (
     <StyledWrapper>
       <SwapInputComponent

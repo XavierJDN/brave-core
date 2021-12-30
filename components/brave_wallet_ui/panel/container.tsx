@@ -211,10 +211,22 @@ function Container (props: Props) {
     setSelectedAccounts([selectedAccount])
   }, [selectedAccount])
 
-  const getSelectedAccountBalance = useBalance(selectedAccount)
-  const { assetBalance: sendAssetBalance } = getSelectedAccountBalance(selectedSendAsset)
-  const { assetBalance: fromAssetBalance } = getSelectedAccountBalance(fromAsset)
-  const { assetBalance: toAssetBalance } = getSelectedAccountBalance(toAsset)
+  const getSelectedAccountBalance = useBalance(selectedNetwork)
+  const sendAssetBalance = getSelectedAccountBalance(
+    selectedAccount,
+    selectedSendAsset?.asset.symbol,
+    selectedSendAsset?.asset.contractAddress
+  )
+  const fromAssetBalance = getSelectedAccountBalance(
+    selectedAccount,
+    fromAsset?.asset.symbol,
+    fromAsset?.asset.contractAddress
+  )
+  const toAssetBalance = getSelectedAccountBalance(
+    selectedAccount,
+    toAsset?.asset.symbol,
+    toAsset?.asset.contractAddress
+  )
 
   const onSelectPresetAmountFactory = usePreset(selectedAccount, fromAsset, selectedSendAsset, onSetFromAmount, onSetSendAmount)
 

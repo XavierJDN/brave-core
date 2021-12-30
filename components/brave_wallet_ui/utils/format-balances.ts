@@ -78,8 +78,8 @@ export const toWeiHex = (value: string, decimals: number) => {
   return (result.isNaN()) ? '0x0' : '0x' + result.toString(16)
 }
 
-export const toGWei = (value: string, decimals: number) => {
-  const result = new BigNumber(value).dividedBy(10 ** decimals).multipliedBy(10 ** 9)
+export const toGWei = (value: string) => {
+  const result = new BigNumber(value).dividedBy(10 ** 9)
   return result.isNaN() ? '0' : result.toFixed(2).replace(/\.00$/, '')
 }
 
@@ -96,4 +96,9 @@ export const gWeiToWeiHex = (value: string) => {
 export const addCurrencies = (first: string, second: string) => {
   const result = new BigNumber(first).plus(new BigNumber(second))
   return `0x${result.toString(16)}`
+}
+
+export const formatHexStrToNumber = (value: string): string => {
+  const result = new BigNumber(value)
+  return result.isNaN() ? '0' : result.toFixed(0)
 }

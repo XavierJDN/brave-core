@@ -21,7 +21,7 @@ import {
 } from '../../constants/types'
 import { SlippagePresetOptions } from '../../options/slippage-preset-options'
 import { ExpirationPresetOptions } from '../../options/expiration-preset-options'
-import { ETH, RopstenSwapAssetOptions } from '../../options/asset-options'
+import { RopstenSwapAssetOptions } from '../../options/asset-options'
 import { formatInputValue, toWei, toWeiHex } from '../../utils/format-balances'
 import { debounce } from '../../../common/debounce'
 import { SwapParamsPayloadType } from '../constants/action_types'
@@ -84,9 +84,9 @@ export default function useSwap (
       .catch(e => console.log(e))
   }, [fromAsset, quote, selectedAccount])
 
-  const getBalance = useBalance(selectedAccount)
-  const { assetBalance: fromAssetBalance } = getBalance(fromAsset)
-  const { assetBalance: ethBalance } = getBalance(ETH)
+  const getBalance = useBalance(selectedNetwork)
+  const fromAssetBalance = getBalance(selectedAccount, fromAsset?.asset.symbol, fromAsset?.asset.contractAddress)
+  const ethBalance = getBalance(selectedAccount, selectedNetwork.symbol)
 
   const feesBN = React.useMemo(() => {
     if (!quote) {
@@ -104,7 +104,7 @@ export default function useSwap (
   const swapValidationError: SwapValidationErrorType | undefined = React.useMemo(() => {
     const fromAmountWei = toWei(fromAmount, fromAsset.asset.decimals)
     const fromAssetBalanceWei = toWei(fromAssetBalance, fromAsset.asset.decimals)
-    const ethBalanceWei = toWei(ethBalance, ETH.asset.decimals)
+    const ethBalanceWei = toWei(ethBalance, selectedNetwork.decimals)
 
     const amountBN = new BigNumber(fromAmountWei)
     const balanceBN = new BigNumber(fromAssetBalanceWei)
@@ -118,7 +118,7 @@ export default function useSwap (
       return 'insufficientEthBalance'
     }
 
-    if (fromAsset.asset.symbol === ETH.asset.symbol && amountBN.plus(feesBN).gt(balanceBN)) {
+    if (fromAsset.asset.symbol === selectedNetwork.symbol && amountBN.plus(feesBN).gt(balanceBN)) {
       return 'insufficientEthBalance'
     }
 

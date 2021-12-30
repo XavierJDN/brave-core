@@ -117,10 +117,10 @@ const ConnectedPanel = (props: Props) => {
     return !SwapSupportedChains.includes(selectedNetwork.chainId)
   }, [SwapSupportedChains, selectedNetwork])
 
-  const formatedAssetBalance = formatBalance(selectedAccount.balance, selectedNetwork.decimals)
+  const formattedAssetBalance = formatBalance(selectedAccount.balance, selectedNetwork.decimals)
 
-  const formatedAssetBalanceWithDecimals = selectedAccount.balance
-    ? formatTokenAmountWithCommasAndDecimals(formatedAssetBalance, selectedNetwork.symbol)
+  const formattedAssetBalanceWithDecimals = selectedAccount.balance
+    ? formatTokenAmountWithCommasAndDecimals(formattedAssetBalance, selectedNetwork.symbol)
     : ''
 
   const onClickViewOnBlockExplorer = useExplorer(selectedNetwork)
@@ -161,7 +161,7 @@ const ConnectedPanel = (props: Props) => {
           </Tooltip>
         </BalanceColumn>
         <BalanceColumn>
-          <AssetBalanceText>{formatedAssetBalanceWithDecimals}</AssetBalanceText>
+          <AssetBalanceText>{formattedAssetBalanceWithDecimals}</AssetBalanceText>
           <FiatBalanceText>{formatFiatAmountWithCommasAndDecimals(selectedAccount.fiatBalance, defaultCurrencies.fiat)}</FiatBalanceText>
         </BalanceColumn>
       </CenterColumn>

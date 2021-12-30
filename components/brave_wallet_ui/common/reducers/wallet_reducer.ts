@@ -32,6 +32,7 @@ import { mojoTimeDeltaToJSDate } from '../../utils/datetime-utils'
 import * as WalletActions from '../actions/wallet_actions'
 import { formatFiatBalance } from '../../utils/format-balances'
 import { sortTransactionByDate } from '../../utils/tx-utils'
+import { normalizeNumericValue } from '../../utils/bn-utils'
 
 const defaultState: WalletState = {
   hasInitialized: false,
@@ -162,7 +163,7 @@ reducer.on(WalletActions.nativeAssetBalancesUpdated, (state: any, payload: GetNa
 
   accounts.forEach((account, index) => {
     if (payload.balances[index].error === BraveWallet.ProviderError.kSuccess) {
-      accounts[index].balance = payload.balances[index].balance
+      accounts[index].balance = normalizeNumericValue(payload.balances[index].balance)
       accounts[index].fiatBalance = payload.fiatPrice !== ''
         ? formatFiatBalance(payload.balances[index].balance, state.selectedNetwork.decimals, payload.fiatPrice).toString()
         : ''
@@ -214,7 +215,7 @@ reducer.on(WalletActions.tokenBalancesUpdated, (state: any, payload: GetERC20Tok
       }
       account.tokens.splice(tokenIndex, 1, {
         asset: userVisibleTokensInfo[tokenIndex],
-        assetBalance,
+        assetBalance: normalizeNumericValue(assetBalance),
         fiatBalance
       })
     })

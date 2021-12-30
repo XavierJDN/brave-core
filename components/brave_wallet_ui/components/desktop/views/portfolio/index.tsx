@@ -18,7 +18,6 @@ import {
   formatFiatAmountWithCommasAndDecimals,
   formatTokenAmountWithCommasAndDecimals
 } from '../../../../utils/format-prices'
-import { formatBalance } from '../../../../utils/format-balances'
 import { sortTransactionByDate } from '../../../../utils/tx-utils'
 
 // Options
@@ -39,7 +38,7 @@ import {
 } from '../../'
 
 // Hooks
-import { useTransactionParser } from '../../../../common/hooks'
+import { useBalance, useTransactionParser } from '../../../../common/hooks'
 
 // Styled Components
 import {
@@ -155,6 +154,8 @@ const Portfolio = (props: Props) => {
   const [showNetworkDropdown, setShowNetworkDropdown] = React.useState<boolean>(false)
   const parseTransaction = useTransactionParser(selectedNetwork, accounts, transactionSpotPrices, userVisibleTokensInfo)
 
+  const getAccountBalance = useBalance(selectedNetwork)
+
   const toggleShowNetworkDropdown = () => {
     setShowNetworkDropdown(!showNetworkDropdown)
   }
@@ -236,11 +237,6 @@ const Portfolio = (props: Props) => {
   const getFiatBalance = (account: WalletAccountType, asset: BraveWallet.ERCToken) => {
     const found = account.tokens.find((token) => token.asset.contractAddress === asset.contractAddress)
     return (found) ? found.fiatBalance : ''
-  }
-
-  const getAssetBalance = (account: WalletAccountType, asset: BraveWallet.ERCToken) => {
-    const found = account.tokens.find((token) => token.asset.contractAddress === asset.contractAddress)
-    return (found) ? formatBalance(found.assetBalance, found.asset.decimals) : ''
   }
 
   const priceHistory = React.useMemo(() => {
@@ -342,10 +338,11 @@ const Portfolio = (props: Props) => {
               defaultCurrencies={defaultCurrencies}
               key={account.address}
               assetTicker={selectedAsset.symbol}
+              assetDecimals={selectedAsset.decimals}
               name={account.name}
               address={account.address}
               fiatBalance={getFiatBalance(account, selectedAsset)}
-              assetBalance={getAssetBalance(account, selectedAsset)}
+              assetBalance={getAccountBalance(account, selectedAsset.symbol, selectedAsset.contractAddress)}
               selectedNetwork={selectedNetwork}
             />
           )}

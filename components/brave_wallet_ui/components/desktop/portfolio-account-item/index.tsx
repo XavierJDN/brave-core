@@ -11,11 +11,13 @@ import {
   formatFiatAmountWithCommasAndDecimals,
   formatTokenAmountWithCommasAndDecimals
 } from '../../../utils/format-prices'
+import { formatBalance } from '../../../utils/format-balances'
 
 import { Tooltip } from '../../shared'
 import { getLocale } from '../../../../common/locale'
 import { BraveWallet, DefaultCurrencies } from '../../../constants/types'
 import { TransactionPopup } from '../'
+
 // Styled Components
 import {
   StyledWrapper,
@@ -39,6 +41,7 @@ export interface Props {
   fiatBalance: string
   assetBalance: string
   assetTicker: string
+  assetDecimals: number
   selectedNetwork: BraveWallet.EthereumChain
   name: string
 }
@@ -50,6 +53,7 @@ const PortfolioAccountItem = (props: Props) => {
     assetBalance,
     fiatBalance,
     assetTicker,
+    assetDecimals,
     selectedNetwork,
     defaultCurrencies
   } = props
@@ -63,6 +67,8 @@ const PortfolioAccountItem = (props: Props) => {
   }, [address])
 
   const onClickViewOnBlockExplorer = useExplorer(selectedNetwork)
+
+  const formattedAssetBalance = formatBalance(assetBalance, assetDecimals)
 
   const onShowTransactionPopup = () => {
     setShowAccountPopup(true)
@@ -88,7 +94,7 @@ const PortfolioAccountItem = (props: Props) => {
       <RightSide>
         <BalanceColumn>
           <FiatBalanceText>{formatFiatAmountWithCommasAndDecimals(fiatBalance, defaultCurrencies.fiat)}</FiatBalanceText>
-          <AssetBalanceText>{formatTokenAmountWithCommasAndDecimals(assetBalance, assetTicker)}</AssetBalanceText>
+          <AssetBalanceText>{formatTokenAmountWithCommasAndDecimals(formattedAssetBalance, assetTicker)}</AssetBalanceText>
         </BalanceColumn>
         <MoreButton onClick={onShowTransactionPopup}>
           <MoreIcon />

@@ -12,7 +12,6 @@ import { reduceAddress } from '../../../../utils/reduce-address'
 import { copyToClipboard } from '../../../../utils/copy-to-clipboard'
 import { create } from 'ethereum-blockies'
 import { getLocale } from '../../../../../common/locale'
-import { formatBalance } from '../../../../utils/format-balances'
 import { sortTransactionByDate } from '../../../../utils/tx-utils'
 
 // Styled Components
@@ -287,7 +286,7 @@ function Accounts (props: Props) {
             <PortfolioAssetItem
               defaultCurrencies={defaultCurrencies}
               key={item.asset.contractAddress}
-              assetBalance={formatBalance(item.assetBalance, item.asset.decimals)}
+              assetBalance={item.assetBalance}
               fiatBalance={item.fiatBalance}
               token={item.asset}
             />
@@ -301,7 +300,7 @@ function Accounts (props: Props) {
                 <PortfolioAssetItem
                   defaultCurrencies={defaultCurrencies}
                   key={item.asset.contractAddress}
-                  assetBalance={formatBalance(item.assetBalance, item.asset.decimals)}
+                  assetBalance={item.assetBalance}
                   fiatBalance={item.fiatBalance}
                   token={item.asset}
                 />

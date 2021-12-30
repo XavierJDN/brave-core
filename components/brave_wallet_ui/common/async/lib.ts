@@ -6,7 +6,6 @@
 import {
   HardwareWalletConnectOpts
 } from '../../components/desktop/popup-modals/add-account-modal/hardware-wallet-connect/types'
-import { formatBalance } from '../../utils/format-balances'
 import {
   AccountTransactions,
   BraveWallet,
@@ -15,8 +14,12 @@ import {
   GetERCTokenInfoReturnInfo
 } from '../../constants/types'
 import * as WalletActions from '../actions/wallet_actions'
+
+// Utils
 import { GetNetworkInfo } from '../../utils/network-utils'
 import { GetTokenParam } from '../../utils/api-utils'
+import { normalizeNumericValue } from '../../utils/bn-utils'
+
 import getAPIProxy from './bridge'
 import { Dispatch, State } from './types'
 import LedgerBridgeKeyring from '../../common/hardware/ledgerjs/eth_ledger_bridge_keyring'
@@ -63,10 +66,10 @@ export const onConnectHardwareWallet = (opts: HardwareWalletConnectOpts): Promis
 
 export const getBalance = (address: string): Promise<string> => {
   return new Promise(async (resolve, reject) => {
-    const controller = getAPIProxy().ethJsonRpcController
-    const result = await controller.getBalance(address)
+    const { ethJsonRpcController } = getAPIProxy()
+    const result = await ethJsonRpcController.getBalance(address)
     if (result.error === BraveWallet.ProviderError.kSuccess) {
-      resolve(formatBalance(result.balance, 18))
+      resolve(normalizeNumericValue(result.balance))
     } else {
       reject()
     }
@@ -124,10 +127,8 @@ export async function getBuyAssets () {
 
 export function refreshBalances (currentNetwork: BraveWallet.EthereumChain) {
   return async (dispatch: Dispatch, getState: () => State) => {
-    const apiProxy = getAPIProxy()
+    const { braveWalletService, ethJsonRpcController } = getAPIProxy()
     const { wallet: { accounts } } = getState()
-
-    const { braveWalletService, ethJsonRpcController } = apiProxy
 
     const visibleTokensInfo = await braveWalletService.getUserAssets(currentNetwork.chainId)
 

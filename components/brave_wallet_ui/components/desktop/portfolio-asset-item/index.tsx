@@ -2,7 +2,7 @@ import * as React from 'react'
 
 // Options
 import { BraveWallet, DefaultCurrencies } from '../../../constants/types'
-import { hexToNumber } from '../../../utils/format-balances'
+import { formatBalance, hexToNumber } from '../../../utils/format-balances'
 
 // Styled Components
 import {
@@ -41,12 +41,14 @@ const PortfolioAssetItem = (props: Props) => {
     return withPlaceholderIcon(AssetIcon, { size: 'big', marginLeft: 0, marginRight: 8 })
   }, [])
 
-  const formatedAssetBalance = token.isErc721 ? assetBalance : formatTokenAmountWithCommasAndDecimals(assetBalance, token.symbol)
+  const formattedAssetBalance = token.isErc721
+    ? formatBalance(assetBalance, token.decimals)
+    : formatTokenAmountWithCommasAndDecimals(formatBalance(assetBalance, token.decimals), token.symbol)
 
   return (
     <>
       {token.visible &&
-        // Selecting a erc721 token is temp disabled until UI is ready for viewing NFT's
+        // Selecting an erc721 token is temp disabled until UI is ready for viewing NFT's
         <StyledWrapper disabled={token.isErc721} onClick={action}>
           <NameAndIcon>
             <AssetIconWithPlaceholder selectedAsset={token} />
@@ -56,7 +58,7 @@ const PortfolioAssetItem = (props: Props) => {
             {!token.isErc721 &&
               <FiatBalanceText>{formatFiatAmountWithCommasAndDecimals(fiatBalance, defaultCurrencies.fiat)}</FiatBalanceText>
             }
-            <AssetBalanceText>{formatedAssetBalance}</AssetBalanceText>
+            <AssetBalanceText>{formattedAssetBalance}</AssetBalanceText>
           </BalanceColumn>
         </StyledWrapper>
       }

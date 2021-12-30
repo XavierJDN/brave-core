@@ -7,6 +7,7 @@ import * as React from 'react'
 import { connect } from 'react-redux'
 import { bindActionCreators, Dispatch } from 'redux'
 import { Switch, Route, useHistory, useLocation } from 'react-router-dom'
+
 import * as WalletPageActions from './actions/wallet_page_actions'
 import * as WalletActions from '../common/actions/wallet_actions'
 import store from './store'
@@ -39,9 +40,13 @@ import {
 import BuySendSwap from '../stories/screens/buy-send-swap'
 import Onboarding from '../stories/screens/onboarding'
 import BackupWallet from '../stories/screens/backup-wallet'
+
+// Utils
 import { formatWithCommasAndDecimals } from '../utils/format-prices'
 import { GetBuyOrFaucetUrl } from '../utils/buy-asset-url'
 import { mojoTimeDeltaToJSDate } from '../utils/datetime-utils'
+import { stripERC20TokenImageURL } from '../utils/string-utils'
+import { addNumericValues } from '../utils/bn-utils'
 
 import {
   findENSAddress,
@@ -55,16 +60,16 @@ import {
   getBuyAssets
 } from '../common/async/lib'
 
-import { formatBalance } from '../utils/format-balances'
+// Hooks
 import {
   useSwap,
   useAssets,
   useBalance,
   useSend,
   usePreset,
-  useTokenInfo
+  useTokenInfo,
+  usePricing
 } from '../common/hooks'
-import { stripERC20TokenImageURL } from '../utils/string-utils'
 
 type Props = {
   wallet: WalletState
@@ -201,10 +206,23 @@ function Container (props: Props) {
     props.wallet.fullTokenList
   )
 
-  const getSelectedAccountBalance = useBalance(selectedAccount)
-  const { assetBalance: sendAssetBalance } = getSelectedAccountBalance(selectedSendAsset)
-  const { assetBalance: fromAssetBalance } = getSelectedAccountBalance(fromAsset)
-  const { assetBalance: toAssetBalance } = getSelectedAccountBalance(toAsset)
+  const { computeFiatAmount } = usePricing(transactionSpotPrices)
+  const getAccountBalance = useBalance(selectedNetwork)
+  const sendAssetBalance = getAccountBalance(
+    selectedAccount,
+    selectedSendAsset?.asset.symbol,
+    selectedSendAsset?.asset.contractAddress
+  )
+  const fromAssetBalance = getAccountBalance(
+    selectedAccount,
+    fromAsset?.asset.symbol,
+    fromAsset?.asset.contractAddress
+  )
+  const toAssetBalance = getAccountBalance(
+    selectedAccount,
+    toAsset?.asset.symbol,
+    toAsset?.asset.contractAddress
+  )
 
   const onSelectPresetAmountFactory = usePreset(selectedAccount, fromAsset, selectedSendAsset, onSetFromAmount, onSetSendAmount)
 
@@ -286,46 +304,32 @@ function Container (props: Props) {
     return (mnemonic || '').split(' ')
   }, [mnemonic])
 
-  // This will scrape all of the user's accounts and combine the asset balances for a single asset
-  const fullAssetBalance = (asset: BraveWallet.ERCToken): number | string => {
-    const amounts = accounts.map((account) => {
-      let balance
-      const found = account.tokens.find((token) => token.asset.contractAddress === asset.contractAddress)
-      if (found) {
-        balance = Number(formatBalance(found.assetBalance, found.asset.decimals))
-      }
-      return balance
+  // This will scrape all the user's accounts and combine the asset balances for a single asset
+  const fullAssetBalance = React.useCallback((asset: BraveWallet.ERCToken) => {
+    const amounts = accounts.map((account) =>
+      getAccountBalance(account, asset.symbol, asset.contractAddress))
+
+    return amounts.reduce(function (a, b) {
+      return a !== '' && b !== ''
+        ? addNumericValues(a, b)
+        : ''
     })
-    const grandTotal = amounts.reduce(function (a, b) {
-      return a !== undefined && b !== undefined ? a + b : undefined
-    })
-    return grandTotal ?? ''
-  }
+  }, [accounts, getAccountBalance])
 
   // This will scrape all of the user's accounts and combine the fiat value for a single asset
-  const fullAssetFiatBalance = (asset: BraveWallet.ERCToken): number | string => {
-    const amounts = accounts.map((account) => {
-      let fiatBalance
-      const found = account.tokens.find((token) => token.asset.contractAddress === asset.contractAddress)
-      if (found && found.fiatBalance !== '') {
-        fiatBalance = Number(found.fiatBalance)
-      }
-      return fiatBalance
-    })
-    const grandTotal = amounts.reduce(function (a, b) {
-      return a !== undefined && b !== undefined ? a + b : undefined
-    })
-    return grandTotal ?? ''
-  }
+  const fullAssetFiatBalance = React.useCallback((asset: BraveWallet.ERCToken) => {
+    const balance = fullAssetBalance(asset)
+    return computeFiatAmount(balance, asset.symbol, asset.decimals)
+  }, [fullAssetBalance, computeFiatAmount])
 
   // This looks at the users asset list and returns the full balance for each asset
   const userAssetList = React.useMemo(() => {
     return userVisibleTokenOptions.map((asset) => ({
       asset: asset,
-      assetBalance: fullAssetBalance(asset)?.toString(),
-      fiatBalance: fullAssetFiatBalance(asset)?.toString()
-    }))
-  }, [userVisibleTokenOptions, accounts])
+      assetBalance: fullAssetBalance(asset),
+      fiatBalance: fullAssetFiatBalance(asset)
+    }) as AccountAssetOptionType)
+  }, [userVisibleTokenOptions, fullAssetBalance, fullAssetFiatBalance])
 
   const onSelectAsset = (asset: BraveWallet.ERCToken) => {
     props.walletPageActions.selectAsset({ asset: asset, timeFrame: selectedTimeline })
@@ -333,17 +337,22 @@ function Container (props: Props) {
 
   // This will scrape all of the user's accounts and combine the fiat value for every asset
   const fullPortfolioBalance = React.useMemo(() => {
-    const filteredList = userAssetList.filter((token) => token.asset.visible && !token.asset.isErc721)
-    const amountList = filteredList.map((item) => {
-      return fullAssetFiatBalance(item.asset) !== '' ? fullAssetFiatBalance(item.asset) : undefined
-    })
-    if (amountList.length === 0) {
+    const visibleAssetOptions = userAssetList
+      .filter((token) => token.asset.visible && !token.asset.isErc721)
+
+    if (visibleAssetOptions.length === 0) {
       return ''
     }
-    const grandTotal = amountList.reduce(function (a, b) {
-      return a !== undefined && b !== undefined ? Number(a) + Number(b) : undefined
+
+    const visibleAssetBalances = visibleAssetOptions
+      .map((item) => item.fiatBalance)
+
+    const grandTotal = visibleAssetBalances.reduce(function (a, b) {
+      return a !== '' && b !== ''
+        ? addNumericValues(a, b)
+        : ''
     })
-    return grandTotal !== undefined ? formatWithCommasAndDecimals(grandTotal?.toString()) : ''
+    return formatWithCommasAndDecimals(grandTotal)
   }, [userAssetList])
 
   const onChangeTimeline = (timeline: BraveWallet.AssetPriceTimeframe) => {

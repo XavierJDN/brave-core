@@ -11,6 +11,7 @@ import { HardwareWalletResponseCodeType } from '../common/hardware/types'
 // path of generated mojom files.
 export { BraveWallet }
 export { Url } from 'gen/url/mojom/url.mojom.m.js'
+export { TimeDelta }
 
 export interface WalletAccountType {
   id: string
